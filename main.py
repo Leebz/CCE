@@ -148,9 +148,6 @@ if __name__ == "__main__":
 			episode_timesteps = 0
 			episode_num += 1
 			# plot episode reward
-	np.save(f"./results/TD3", reward_trace)
-
-
 
 		# Evaluate episode
 		# if (t + 1) % args.eval_freq == 0:
@@ -158,4 +155,6 @@ if __name__ == "__main__":
 		#
 		# 	np.save(f"./results/{file_name}", evaluations)
 		# 	if args.save_model: policy.save(f"./models/{file_name}")
+
+
 
