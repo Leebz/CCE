@@ -43,12 +43,13 @@ if __name__ == "__main__":
         "max_action": config.max_action,
         "discount": config.discount,
         "tau": config.tau,
-        "policy_noise": config.policy_noise,
-        "noise_clip": config.noise_clip,
-        "policy_freq": config.policy_freq,
+        # "policy_noise": config.policy_noise,
+        # "noise_clip": config.noise_clip,
+        # "policy_freq": config.policy_freq,
     }
 
-    agent = TD3.TD3(**kwargs)
+    # agent = TD3.TD3(**kwargs)
+    agent = DDPG.DDPG(**kwargs)
 
     # 载入模型
     if config.load_model is not None:
@@ -93,7 +94,7 @@ if __name__ == "__main__":
             agent.train(replay_buffer, config.batch_size)
 
         if done:
-            print(f"Total timesteps: {t}, Episode Num: {episode_num+1} Episode Steps: {episode_timesteps} Reward: {episode_reward}")
+            print(f"Total timesteps: {t+1}, Episode Num: {episode_num+1} Episode Steps: {episode_timesteps} Reward: {episode_reward}")
             reward_trace.append(episode_reward)
 
             # Reset Env
@@ -101,6 +102,11 @@ if __name__ == "__main__":
             episode_reward = 0
             episode_timesteps = 0
             episode_num += 1
+    np.save(f"./results/data_1", reward_trace)
+
+
+
+
 
 
 

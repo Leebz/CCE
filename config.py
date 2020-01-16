@@ -6,10 +6,10 @@ class Config(object):
         self.action_dim = 1
         self.max_action = 2.0
 
-        self.seed = None                            # 随机种子
+        self.seed = 1                            # 随机种子
         self.start_timesteps = int(1e3)             # 开始学习的步数
         self.eval_freq = int(5e3)                   # 策略评估频率
-        self.max_timesteps = int(1e6)               # 总步数
+        self.max_timesteps = int(1e4)               # 总步数
         self.expl_noise = 0.1                       # 高斯噪声标准差
         self.batch_size = 256                       # Batch Size
         self.discount = 0.99                        # 折扣因子
