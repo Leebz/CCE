@@ -1,16 +1,14 @@
 import numpy as np
 import torch
 import gym
-import argparse
 import os
-import matplotlib.pyplot as plt
 
-import utils
-import TD3
-import OurDDPG
-import DDPG
+from Tools import utils
+from RL_Brains import TD3
 
-from config import Config
+from Enviroments import Env
+
+from Configs.config import Config
 
 if __name__ == "__main__":
 
@@ -19,8 +17,8 @@ if __name__ == "__main__":
     config = Config()
 
     # 检查文件夹
-    if not os.path.exists("./results"):
-        os.makedirs("./results")
+    if not os.path.exists("../Results"):
+        os.makedirs("../Results")
 
     if config.save_model and not os.path.exists("./models"):
         os.makedirs("./models")
@@ -48,8 +46,8 @@ if __name__ == "__main__":
         # "policy_freq": config.policy_freq,
     }
 
-    # agent = TD3.TD3(**kwargs)
-    agent = DDPG.DDPG(**kwargs)
+    agent = TD3.TD3(**kwargs)
+    # agent = DDPG.DDPG(**kwargs)
 
     # 载入模型
     if config.load_model is not None:
@@ -69,7 +67,6 @@ if __name__ == "__main__":
 
     for t in range(config.max_timesteps):
         episode_timesteps += 1
-
         # 选择动作
         if t < config.start_timesteps:
             action = env.action_space.sample()
@@ -102,7 +99,7 @@ if __name__ == "__main__":
             episode_reward = 0
             episode_timesteps = 0
             episode_num += 1
-    np.save(f"./results/data_1", reward_trace)
+    np.save(f"Results/data_1", reward_trace)
 
 
 

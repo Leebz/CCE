@@ -3,12 +3,9 @@ import torch
 import gym
 import argparse
 import os
-import matplotlib.pyplot as plt
 
-import utils
-import TD3
-import OurDDPG
-import DDPG
+from Tools import utils
+from RL_Brains import OurDDPG, TD3, DDPG
 
 
 # Runs policy for X episodes and returns average reward
@@ -58,8 +55,8 @@ if __name__ == "__main__":
 	print(f"Policy: {args.policy}, Env: {args.env}, Seed: {args.seed}")
 	print("---------------------------------------")
 
-	if not os.path.exists("./results"):
-		os.makedirs("./results")
+	if not os.path.exists("../Results"):
+		os.makedirs("../Results")
 
 	if args.save_model and not os.path.exists("./models"):
 		os.makedirs("./models")
@@ -153,7 +150,7 @@ if __name__ == "__main__":
 		# if (t + 1) % args.eval_freq == 0:
 		# 	evaluations.append(eval_policy(policy, args.env, args.seed))
 		#
-		# 	np.save(f"./results/{file_name}", evaluations)
+		# 	np.save(f"./Results/{file_name}", evaluations)
 		# 	if args.save_model: policy.save(f"./models/{file_name}")
 
 

@@ -20,12 +20,12 @@ class Actor(nn.Module):
 		self.l3 = nn.Linear(256, action_dim)
 		
 		self.max_action = max_action
-		
 
 	def forward(self, state):
 		a = F.relu(self.l1(state))
 		a = F.relu(self.l2(a))
-		return self.max_action * torch.tanh(self.l3(a))
+		# return self.max_action * torch.tanh(self.l3(a))
+		return self.max_action * torch.sigmoid(self.l3(a))
 
 
 class Critic(nn.Module):
@@ -41,7 +41,6 @@ class Critic(nn.Module):
 		self.l4 = nn.Linear(state_dim + action_dim, 256)
 		self.l5 = nn.Linear(256, 256)
 		self.l6 = nn.Linear(256, 1)
-
 
 	def forward(self, state, action):
 		sa = torch.cat([state, action], 1)
@@ -75,23 +74,23 @@ class TD3(object):
 		tau=0.005,
 		policy_noise=0.2,
 		noise_clip=0.5,
-		policy_freq=2
+		policy_freq=2,
+		lr=3e-4,
 	):
-
-		self.actor = Actor(state_dim, action_dim, max_action).to(device)
-		self.actor_target = copy.deepcopy(self.actor)
-		self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=3e-4)
-
-		self.critic = Critic(state_dim, action_dim).to(device)
-		self.critic_target = copy.deepcopy(self.critic)
-		self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=3e-4)
-
 		self.max_action = max_action
 		self.discount = discount
 		self.tau = tau
 		self.policy_noise = policy_noise
 		self.noise_clip = noise_clip
 		self.policy_freq = policy_freq
+
+		self.actor = Actor(state_dim, action_dim, max_action).to(device)
+		self.actor_target = copy.deepcopy(self.actor)
+		self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=lr)
+
+		self.critic = Critic(state_dim, action_dim).to(device)
+		self.critic_target = copy.deepcopy(self.critic)
+		self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=lr)
 
 		self.total_it = 0
 
