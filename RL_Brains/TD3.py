@@ -5,8 +5,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
+UNIT = 128
 # Implementation of Twin Delayed Deep Deterministic Policy Gradients (TD3)
 # Paper: https://arxiv.org/abs/1802.09477
 
@@ -15,9 +16,9 @@ class Actor(nn.Module):
 	def __init__(self, state_dim, action_dim, max_action):
 		super(Actor, self).__init__()
 
-		self.l1 = nn.Linear(state_dim, 256)
-		self.l2 = nn.Linear(256, 256)
-		self.l3 = nn.Linear(256, action_dim)
+		self.l1 = nn.Linear(state_dim, UNIT)
+		self.l2 = nn.Linear(UNIT, UNIT)
+		self.l3 = nn.Linear(UNIT, action_dim)
 		
 		self.max_action = max_action
 
@@ -33,14 +34,14 @@ class Critic(nn.Module):
 		super(Critic, self).__init__()
 
 		# Q1 architecture
-		self.l1 = nn.Linear(state_dim + action_dim, 256)
-		self.l2 = nn.Linear(256, 256)
-		self.l3 = nn.Linear(256, 1)
+		self.l1 = nn.Linear(state_dim + action_dim, UNIT)
+		self.l2 = nn.Linear(UNIT, UNIT)
+		self.l3 = nn.Linear(UNIT, 1)
 
 		# Q2 architecture
-		self.l4 = nn.Linear(state_dim + action_dim, 256)
-		self.l5 = nn.Linear(256, 256)
-		self.l6 = nn.Linear(256, 1)
+		self.l4 = nn.Linear(state_dim + action_dim, UNIT)
+		self.l5 = nn.Linear(UNIT, UNIT)
+		self.l6 = nn.Linear(UNIT, 1)
 
 	def forward(self, state, action):
 		sa = torch.cat([state, action], 1)

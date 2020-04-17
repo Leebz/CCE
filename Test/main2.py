@@ -63,16 +63,16 @@ if __name__ == "__main__":
 	if args.save_model and not os.path.exists("./models"):
 		os.makedirs("./models")
 
-	env = gym.make(args.env)
+	env = CCE_ENV.Env(seed=args.seed)
 
 	# Set seeds
-	env.seed(args.seed)
+	# env.seed(args.seed)
 	torch.manual_seed(args.seed)
 	np.random.seed(args.seed)
 	
-	state_dim = env.observation_space.shape[0]
-	action_dim = env.action_space.shape[0] 
-	max_action = float(env.action_space.high[0])
+	state_dim = 4
+	action_dim = 1
+	max_action = 1.0
 
 	kwargs = {
 		"state_dim": state_dim,
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 	replay_buffer = utils.ReplayBuffer(state_dim, action_dim, max_size=int(1e4))
 	
 	# Evaluate untrained policy
-	evaluations = [eval_policy(policy, args.env, args.seed)]
+	# evaluations = [eval_policy(policy, args.env, args.seed)]
 
 	state, done = env.reset(), False
 	episode_reward = 0
@@ -116,7 +116,7 @@ if __name__ == "__main__":
 
 		# Select action randomly or according to policy
 		if t < args.start_timesteps:
-			action = env.action_space.sample()
+			action = np.random.rand()
 		else:
 			action = policy.select_action(np.array(state))
 			noise = np.random.normal(0, max_action * args.expl_noise, size=action_dim)
@@ -124,8 +124,8 @@ if __name__ == "__main__":
 			action = action.clip(0, max_action)
 
 		# Perform action
-		next_state, reward, done, _ = env.step(action) 
-		done_bool = float(done) if episode_timesteps < env._max_episode_steps else 0
+		next_state, reward, done = env.step(action)
+		done_bool = float(done) if episode_timesteps < CCE_ENV.TOTAL_TASK_NUM else 0
 
 		# Store data in replay buffer
 		replay_buffer.add(state, action, next_state, reward, done_bool)
