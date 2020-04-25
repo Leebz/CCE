@@ -1,40 +1,44 @@
 import numpy as np
-import torch
+import matplotlib.pyplot as plt
 
 
-class ReplayBuffer(object):
-	def __init__(self, state_dim, action_dim, max_size=int(1e6)):
-		self.max_size = max_size
-		self.ptr = 0
-		self.size = 0
+def plotLearning(scores, filename, x=None, window=5):
+    print("------------------------Saving Picture--------------------------------")
+    N = len(scores)
+    running_avg = np.empty(N)
 
-		self.state = np.zeros((max_size, state_dim))
-		self.action = np.zeros((max_size, action_dim))
-		self.next_state = np.zeros((max_size, state_dim))
-		self.reward = np.zeros((max_size, 1))
-		self.not_done = np.zeros((max_size, 1))
+    for t in range(N):
+        running_avg[t] = np.mean(scores[max(0, t-window):(t+1)])
 
-		self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if x is None:
+        x = [i for i in range(N)]
 
+    plt.ylabel('Score')
+    plt.xlabel('Game')
 
-	def add(self, state, action, next_state, reward, done):
-		self.state[self.ptr] = state
-		self.action[self.ptr] = action
-		self.next_state[self.ptr] = next_state
-		self.reward[self.ptr] = reward
-		self.not_done[self.ptr] = 1. - done
+    plt.plot(x, running_avg, "r", label="our")
+    plt.legend()
 
-		self.ptr = (self.ptr + 1) % self.max_size
-		self.size = min(self.size + 1, self.max_size)
+    plt.savefig(filename)
+    plt.close()
 
 
-	def sample(self, batch_size):
-		ind = np.random.randint(0, self.size, size=batch_size)
+def read_txt(path):
+    res = []
+    with open(path, "r") as f:
+        lines = f.readlines()
+        for line in lines:
+            line = line.split(',')
+            line = list(map(int, line)) # 转为整型数组
+            res.append(line)
+    res = np.concatenate(res, axis=None)
+    return res
 
-		return (
-			torch.FloatTensor(self.state[ind]).to(self.device),
-			torch.FloatTensor(self.action[ind]).to(self.device),
-			torch.FloatTensor(self.next_state[ind]).to(self.device),
-			torch.FloatTensor(self.reward[ind]).to(self.device),
-			torch.FloatTensor(self.not_done[ind]).to(self.device)
-		)
+def file_name_generator(seed, init_capacity):
+    pass
+
+
+if __name__ == '__main__':
+    data = read_txt("../Dataset/data1.txt")
+    print(len(data))
+

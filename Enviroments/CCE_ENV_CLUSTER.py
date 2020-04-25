@@ -1,15 +1,14 @@
 import numpy as np
 import copy
 import random
+from Tools.utils import *
 EDGE_BASIC_COST = 1.0
 EDGE_COEFFICIENT = 1
-TOTAL_TASK_NUM = 100
 
 
 class Env(object):
     def __init__(self, seed=0,
                  edge_capacity=600,
-                 task_size_mean=10, task_size_std=3,
                  task_length_mean=5, task_length_std=2,
                  price_mean=5, price_std=1
                  ):
@@ -18,14 +17,13 @@ class Env(object):
 
         self.edge_capacity = edge_capacity
         self.remain_capacity = self.edge_capacity
-        self.task_size_mean = task_size_mean
-        self.task_size_std = task_size_std
         self.task_length_mean = task_length_mean
         self.task_length_std = task_length_std
         self.price_mean = price_mean
         self.price_std = price_std
 
         self.task_counter = 0
+        self.max_task_num = 0
         self.ep_r = 0
         self.ep_r_trace = []
 
@@ -38,9 +36,14 @@ class Env(object):
         # 使用记录
         self.usage_record = []
 
+        # 读取数据文件
+        self.data = read_txt("../Dataset/data1.txt")
+        self.max_task_num = len(self.data)
+
     def reset(self):
         np.random.seed(self.seed)
         self.task_counter = 0
+
         self.ep_r = 0
         self.ep_r_trace = []
         self.C_TRACE = []
@@ -98,7 +101,7 @@ class Env(object):
         # 更新系统状态
 
         self.task_counter += 1
-        if self.task_counter == TOTAL_TASK_NUM:
+        if self.task_counter == self.max_task_num:
             self.done = True
             self.state = [remain_capacity, 0, 0, 0]
         else:
@@ -127,17 +130,13 @@ class Env(object):
 
     def task_generator(self):
         # 生成任务数据, 四舍五入制
-        while True:
-            task_size = int(np.around(np.random.normal(self.task_size_mean, self.task_size_std), 1))
-            if task_size >= 1:
-                break
 
         while True:
             task_length = int(np.around(np.random.normal(self.task_length_mean, self.task_length_std), 1))
             if task_length >= 1:
                 break
 
-        return [task_size, task_length]
+        return [self.data[self.task_counter], task_length]
 
     def cloud_price_generator(self):
         # 生成公有云当前价格
@@ -155,14 +154,7 @@ if __name__ == '__main__':
     ep_num = 0
     env.reset()
 
-    # for i in range(5):
-    #     state = env.reset()
-    #     print("=====================")
-    #     for j in range(10):
-    #         print(env.task_generator())
-
-
-    for t in range(1000):
+    for t in range(100000):
         ep_steps += 1
         action = env.action_sample()
         next_state, reward, done = env.step(action)

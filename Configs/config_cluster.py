@@ -4,8 +4,7 @@ from terminaltables import AsciiTable
 class Config(object):
     def __init__(self):
         self.initCapacity = 100
-        self.task_size_mean = 10
-        self.task_size_std = 5
+
         self.task_length_mean = 5
         self.task_length_std = 3
         self.price_mean = 5

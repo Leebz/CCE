@@ -5,7 +5,7 @@ import os
 
 from Tools import ReplayBuffer
 from RL_Brains import TD3
-from Enviroments import CCE_ENV
+from Enviroments import CCE_ENV_CLUSTER
 
 from Configs.config import Config
 
@@ -27,14 +27,12 @@ if __name__ == "__main__":
     envargs = {
         "seed": config.seed,
         "edge_capacity": config.initCapacity,
-        "task_size_mean": config.task_size_mean,
-        "task_size_std": config.task_size_std,
         "task_length_mean": config.task_length_mean,
         "task_length_std": config.task_length_std,
         "price_mean": config.price_mean,
         "price_std": config.price_std
     }
-    env = CCE_ENV.Env(**envargs)
+    env = CCE_ENV_CLUSTER.Env(**envargs)
 
     state_dim = config.state_dim
     action_dim = config.action_dim
@@ -94,7 +92,7 @@ if __name__ == "__main__":
 
         # 执行动作
         next_state, reward, done = env.step(action)
-        done_bool = float(done) if episode_timesteps < CCE_ENV.TOTAL_TASK_NUM else 0
+        done_bool = float(done) if episode_timesteps < env.max_task_num else 0
 
         # 存储到经验池中
         replay_buffer.add(state, action, next_state, reward, done_bool)
@@ -121,8 +119,8 @@ if __name__ == "__main__":
             episode_num += 1
 
             if episode_num % 100 == 0:
-                plotLearning(reward_trace, filename="../Results/seed-0-100.png")
-                agent.save(filename="../Models/"+str(episode_num))
+                plotLearning(reward_trace, filename="../Results/Cluster/seed-0-100.png")
+                # agent.save(filename="../Models/"+str(episode_num))
 
 
 

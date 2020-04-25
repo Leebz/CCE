@@ -4,7 +4,7 @@ import gym
 import argparse
 import os
 
-from Tools import utils
+from Tools import ReplayBuffer
 from RL_Brains import OurDDPG, TD3, DDPG
 
 from Enviroments import CCE_ENV
@@ -98,7 +98,7 @@ if __name__ == "__main__":
 		policy_file = file_name if args.load_model == "default" else args.load_model
 		policy.load(f"./models/{policy_file}")
 
-	replay_buffer = utils.ReplayBuffer(state_dim, action_dim, max_size=int(1e4))
+	replay_buffer = ReplayBuffer.ReplayBuffer(state_dim, action_dim, max_size=int(1e4))
 	
 	# Evaluate untrained policy
 	evaluations = [eval_policy(policy, args.env, args.seed)]

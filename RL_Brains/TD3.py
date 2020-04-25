@@ -7,7 +7,7 @@ import torch.nn.functional as F
 
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 device = torch.device("cpu")
-UNIT = 128
+UNIT = 64
 # Implementation of Twin Delayed Deep Deterministic Policy Gradients (TD3)
 # Paper: https://arxiv.org/abs/1802.09477
 
@@ -115,7 +115,7 @@ class TD3(object):
 			
 			next_action = (
 				self.actor_target(next_state) + noise
-			).clamp(-self.max_action, self.max_action)
+			).clamp(0, self.max_action)
 
 			# Compute the target Q value
 			target_Q1, target_Q2 = self.critic_target(next_state, next_action)
