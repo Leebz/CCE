@@ -3,7 +3,7 @@ import copy
 import random
 EDGE_BASIC_COST = 1.0
 EDGE_COEFFICIENT = 1
-TOTAL_TASK_NUM = 100
+TOTAL_TASK_NUM = 1000
 
 
 class Env(object):
@@ -145,6 +145,58 @@ class Env(object):
             price = np.around(np.random.normal(self.price_mean, self.price_std), 4)
             if price > 0.0:
                 return price
+
+    def edge_first_step(self):
+        releasedVM = self.update_record()
+
+        state = copy.deepcopy(self.state)
+        remain_capacity = state[0]
+        task_size = state[1]
+        task_length = state[2]
+        cloud_price = state[3]
+
+        cost = 0
+        remain_capacity += releasedVM
+
+        cloud_vm = 0
+        edge_vm = task_size
+        if remain_capacity < edge_vm:
+            cloud_vm = edge_vm - remain_capacity
+            edge_vm = task_size - cloud_vm
+
+        # 计算成本(reward)
+        remain_capacity = remain_capacity - edge_vm
+        self.C_TRACE.append(remain_capacity)
+        edge_workload = 1 - remain_capacity / self.edge_capacity
+        edge_cost_coefficient = EDGE_COEFFICIENT * (1 + edge_workload) * EDGE_BASIC_COST  # 计算出的VM单位价格
+        edge_cost = edge_cost_coefficient * edge_vm * task_length  # 边缘最终成本
+        cloud_cost = cloud_price * cloud_vm * task_length  # 云服务器最终成本
+
+        cost = edge_cost + cloud_cost  # 最终成本
+
+        # 记录使用数据
+        self.usage_record.append([edge_vm, task_length])
+
+        # 更新系统状态
+
+        self.task_counter += 1
+        if self.task_counter == TOTAL_TASK_NUM:
+            self.done = True
+            self.state = [remain_capacity, 0, 0, 0]
+        else:
+            task_info = self.task_generator()
+            cloud_price = self.cloud_price_generator()
+
+            self.state = [remain_capacity, task_info[0], task_info[1], cloud_price]
+
+        next_state = copy.deepcopy(self.state)
+
+        return next_state, -cost, self.done
+
+
+
+
+
 
 
 if __name__ == '__main__':

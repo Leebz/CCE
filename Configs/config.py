@@ -3,27 +3,27 @@ from terminaltables import AsciiTable
 
 class Config(object):
     def __init__(self):
-        self.initCapacity = 100
-        self.task_size_mean = 10
-        self.task_size_std = 5
+        self.initCapacity = 60
+        self.task_size_mean = 15
+        self.task_size_std = 15
         self.task_length_mean = 5
-        self.task_length_std = 3
+        self.task_length_std = 5
         self.price_mean = 5
         self.price_std = 1
 
-        self.state_dim = 4
+        self.state_dim = 5
         self.action_dim = 1
         self.max_action = 1.0
 
-        self.seed = 0                            # 随机种子
-        self.start_timesteps = int(1e4)             # 开始学习的步数
-        self.eval_freq = int(5e3)                   # 策略评估频率
-        self.max_timesteps = int(1e6)               # 总步数
+        self.seed = 1                            # 随机种子
+        self.start_episode = int(5e1)             # 开始学习的回合数
+        self.eval_freq = 50                   # 策略评估频率
+        self.max_episode = int(1e6)               # 总回合
         self.expl_noise = 0.1                       # 高斯噪声标准差
         self.batch_size = 128                       # Batch Size
         self.discount = 0.99                        # 折扣因子
         self.tau = 0.005                            # Target网络更新率
-        self.lr = 4e-3
+        self.lr = 0.0003
 
         self.policy_noise = 0.2 * self.max_action   # Critic更新时对target网络添加的噪声
         self.noise_clip = 0.5 * self.max_action     # 策略噪声剪切范围

@@ -5,9 +5,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-device = torch.device("cpu")
-UNIT = 64
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cpu")
+UNIT = 256
 # Implementation of Twin Delayed Deep Deterministic Policy Gradients (TD3)
 # Paper: https://arxiv.org/abs/1802.09477
 
@@ -25,8 +25,9 @@ class Actor(nn.Module):
 	def forward(self, state):
 		a = F.relu(self.l1(state))
 		a = F.relu(self.l2(a))
-		# return self.max_action * torch.tanh(self.l3(a))
-		return self.max_action * torch.sigmoid(self.l3(a))
+		a = self.max_action * torch.tanh(self.l3(a))
+		# Rescale action range to [0, 1]
+		return (a + 1) / 2
 
 
 class Critic(nn.Module):

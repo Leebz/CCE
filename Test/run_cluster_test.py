@@ -2,12 +2,13 @@ import numpy as np
 import torch
 import gym
 import os
+import time
 
 from Tools import ReplayBuffer
 from RL_Brains import TD3
 from Enviroments import CCE_ENV_CLUSTER
 
-from Configs.config import Config
+from Configs.config_cluster import Config
 
 from Tools.utils import *
 
@@ -75,52 +76,64 @@ if __name__ == "__main__":
 
     reward_trace = []
 
-    for t in range(config.max_timesteps):
-        episode_timesteps += 1
-        # 选择动作
-        if t < config.start_timesteps:
-            action = env.action_sample()
-        else:
-            action = agent.select_action(np.array(state))
-            noise = np.random.normal(0, config.max_action * config.expl_noise, size=config.action_dim)
-            action = action + noise
-            action = action.clip(0, config.max_action)
-            # action = (
-            #     agent.select_action(np.array(state))
-            #     + np.random.normal(0, config.max_action * config.expl_noise, size=config.action_dim)
-            # ).clip(0, config.max_action)
+    record = -np.infty
+    filename = sim_file_name_generator(config.seed, config.initCapacity)
 
-        # 执行动作
-        next_state, reward, done = env.step(action)
-        done_bool = float(done) if episode_timesteps < env.max_task_num else 0
+    for t in range(config.max_episode):
+        start_time = time.time()
+        while True:
+            episode_timesteps += 1
+            # 选择动作
+            if t < config.start_episode:
+                action = env.action_sample()
+            else:
+                action = agent.select_action(np.array(state))
+                noise = np.random.normal(0, config.max_action * config.expl_noise, size=config.action_dim)
+                action = action + noise
+                action = action.clip(0, config.max_action)
+                # action = (
+                #     agent.select_action(np.array(state))
+                #     + np.random.normal(0, config.max_action * config.expl_noise, size=config.action_dim)
+                # ).clip(0, config.max_action)
 
-        # 存储到经验池中
-        replay_buffer.add(state, action, next_state, reward, done_bool)
+            # 执行动作
+            next_state, reward, done, info = env.step(action)
+            done_bool = float(done) if episode_timesteps < env.max_task_num else 0
 
-        state = next_state
-        episode_reward += reward
+            # 存储到经验池中
+            if info is not None:
+                action = info
+            replay_buffer.add(state, action, next_state, reward, done_bool)
 
-        # 训练
-        if t >= config.start_timesteps:
-            agent.train(replay_buffer, config.batch_size)
+            state = next_state
+            episode_reward += reward
 
-        if done:
-            print(f"Total timesteps: {t+1}, Episode Num: {episode_num+1} Episode Steps: {episode_timesteps} Reward: {episode_reward}")
-            if t>config.start_timesteps:
-                print(env.C_TRACE)
-                print(env.A_TRACE)
-                print("==========================================================================================================")
-            reward_trace.append(episode_reward)
+            # 训练
+            if t >= config.start_episode:
+                agent.train(replay_buffer, config.batch_size)
 
-            # Reset Env
-            state, done = env.reset(), False
-            episode_reward = 0
-            episode_timesteps = 0
-            episode_num += 1
+            if done:
+                end_time = time.time()
+                print(f"Episode Num: {t} Episode Steps: {episode_timesteps} Reward: {episode_reward} Time:{end_time-start_time}")
+                reward_trace.append(episode_reward)
+                if episode_reward > record:
+                    record = episode_reward
 
-            if episode_num % 100 == 0:
-                plotLearning(reward_trace, filename="../Results/Cluster/seed-0-100.png")
-                # agent.save(filename="../Models/"+str(episode_num))
+                # Reset Env
+                state, done = env.reset(), False
+                episode_reward = 0
+                episode_timesteps = 0
+
+                if t % config.eval_freq == 0 and t != 0:
+                    # eval_record.append(eval_policy(agent, eval_episode=10))
+                    # with open(f"{filename}eval.txt", "w") as f:
+                    #     f.write(str(eval_record))
+                    # agent.save(f"../Models/Simulation/eval_{config.seed}_{t}")
+
+                    plotLearning(reward_trace, filename=f"{filename}train.png", window=10)
+                    with open(f"{filename}record.txt", "w") as f:
+                        f.write(f"reward: {record}")
+                break
 
 
 

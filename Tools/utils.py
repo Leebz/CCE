@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 
 def plotLearning(scores, filename, x=None, window=5):
@@ -34,11 +35,29 @@ def read_txt(path):
     res = np.concatenate(res, axis=None)
     return res
 
-def file_name_generator(seed, init_capacity):
-    pass
+
+def sim_file_name_generator(seed, init_capacity, group=None):
+    path = "../Results/Simulation/"
+    if group is None:
+        prefix = f"seed-{seed}-{init_capacity}/"
+    else:
+        prefix = f"seed-{seed}-{group}-{init_capacity}/"
+    if not os.path.exists(f"{path}{prefix}"):
+        os.makedirs(f"{path}{prefix}")
+
+    return path+prefix
+
+def cluster_file_name_generator(seed, init_capacity):
+    path = "../Results/Cluster/"
+
+    prefix = f"seed-{seed}-{init_capacity}/"
+
+    if not os.path.exists(f"{path}{prefix}"):
+        os.makedirs(f"{path}{prefix}")
+
+    return path + prefix
 
 
 if __name__ == '__main__':
-    data = read_txt("../Dataset/data1.txt")
-    print(len(data))
+    print(sim_file_name_generator(3, 999))
 
